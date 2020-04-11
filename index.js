@@ -56,7 +56,7 @@ const xmlResponse = (req, res) => {
 
   const estimation = estimator(body);
 
-  const data = `<?xml version="1.0" encoding="UTF-8"?><estimate>${jsonxml(estimation)}</estimate>`;
+  const data = `<estimate>${jsonxml(estimation)}</estimate>`;
 
   res.status(200).set('Content-Type', 'text/xml').send(data);
 };
@@ -75,7 +75,7 @@ const logsResponse = (fs, path) => async (req, res, next) => {
     const audits = await fs.readJson(path);
 
     Object.keys(audits).forEach((v) => {
-      data += `${v}\t\t${audits[v].originalUrl}\t\t done in ${audits[v].duration} seconds\n`;
+      data += `${v}\t\t${audits[v].originalUrl}\t\tdone in ${audits[v].duration} seconds\n`;
     });
 
     res.status(200).set('Content-Type', 'text/plain').send(data);
@@ -104,7 +104,7 @@ app.post(`${baseURL}/json`, jsonResponse);
 
 app.post(`${baseURL}/xml`, xmlResponse);
 
-app.all(`${baseURL}/logs`, logsResponse(fs, auditLogPath));
+app.get(`${baseURL}/logs`, logsResponse(fs, auditLogPath));
 
 app.use(errorLogger);
 
