@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const jsonxml = require('jsontoxml');
 const responseTime = require('response-time');
 const fs = require('fs');
@@ -70,14 +69,12 @@ const xmlResponse = (req, res) => {
 };
 
 // Respond with logs.
-const logsResponse = (req, res, next) => {
-  fs.readFile(auditLogPath, (err, data) => {
-    if (err) {
-      next(err);
-    } else {
-      res.status(200).set('Content-Type', 'text/plain').send(data);
-    }
-  });
+const logsResponse = (fs) => async (req, res, next) => {
+  try {
+    await fs.createReadStream(auditLogPath).pipe(res);
+  } catch (e) {
+    next(e);
+  }
 };
 
 // Handle route errors.
@@ -87,8 +84,8 @@ const errorHandler = async (err, req, res, next) => {
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use(responseTime(auditLogger(fs, auditLogPath)));
 
@@ -100,7 +97,7 @@ app.post(`${baseURL}/json`, jsonResponse);
 
 app.post(`${baseURL}/xml`, xmlResponse);
 
-app.all(`${baseURL}/logs`, logsResponse);
+app.all(`${baseURL}/logs`, logsResponse(fs));
 
 app.use(errorLogger(fs, errorLogPath));
 
