@@ -20,10 +20,10 @@ const errorLogPath = './error-log.txt';
 const auditLogger = (fs, path) => (req, res, time) => {
   res.on('finish', async () => {
     try {
-      const { method, originalUrl } = req;
-      const { statusCode } = res;
-      const t = `${Math.trunc(time)} ms`;
-      const message = `${method}\t\t${originalUrl}\t\t${statusCode}\t\t${t}\n`;
+      const { originalUrl } = req;
+      const timestamp = new Date().getTime();
+      const t = time.toFixed(2);
+      const message = `${timestamp}\t\t${originalUrl}\t\tdone in ${t} ms\n`;
 
       await fs.createWriteStream(path, { flags: 'a' }).write(message);
     } catch (e) {
