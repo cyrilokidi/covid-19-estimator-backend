@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const jsonxml = require('jsontoxml');
 const responseTime = require('response-time');
 const fs = require('fs');
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const estimator = require('./estimator');
 const version = 1;
 const baseURL = `/api/v${version}/on-covid-19`;
@@ -64,7 +64,7 @@ const xmlResponse = (req, res) => {
 
   const estimation = estimator(body);
 
-  const data = jsonxml(estimation);
+  const data = `<?xml version="1.0" encoding="UTF-8"?><estimate>${jsonxml(estimation)}</estimate>`;
 
   res.status(200).set('Content-Type', 'text/xml').send(data);
 };
