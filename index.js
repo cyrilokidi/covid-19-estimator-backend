@@ -9,29 +9,8 @@ const port = process.env.PORT || 3000;
 const estimator = require('./estimator');
 const version = 1;
 const baseURL = `/api/v${version}/on-covid-19`;
-const sysLogPath = './sys-log.txt';
 const auditLogPath = './audit-log.txt';
 const errorLogPath = './error-log.txt';
-
-/**
- * Log system messages.
- *
- * @param {string} path Log path.
- *
- * @param {string} message Log message.
- *
- * @param {object} cb Callback function.
- */
-
-const sysLogger = async (fs, path, message, cb) => {
-  try {
-    await fs.createWriteStream(path, { flags: 'a' }).write(`${message}\n`);
-
-    cb(null);
-  } catch (e) {
-    cb(e);
-  }
-};
 
 /**
  * Log audit messages.
@@ -113,6 +92,8 @@ app.use(bodyParser.json());
 
 app.use(responseTime(auditLogger(fs, auditLogPath)));
 
+app.all('/', (req, res) => res.status(200).set('Content-Type', 'text/plain').send('API is ready.'));
+
 app.post(baseURL, jsonResponse);
 
 app.post(`${baseURL}/json`, jsonResponse);
@@ -125,10 +106,4 @@ app.use(errorLogger(fs, errorLogPath));
 
 app.use(errorHandler);
 
-app.listen(port, () => {
-  const message = `Server is listening on port [${port}]`;
-
-  sysLogger(fs, sysLogPath, message, (err) => {
-    if (err) throw err;
-  });
-});
+app.listen(port, () => console.log(`Server is listening on port [${port}]`));
