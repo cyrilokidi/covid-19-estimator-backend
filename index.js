@@ -3,16 +3,17 @@ require('dotenv').config();
 const express = require('express');
 const jsonxml = require('jsontoxml');
 const responseTime = require('response-time');
-const fs = require('fs');
+const fs = require('fs-extra');
 const port = process.env.PORT || 5000;
 const estimator = require('./estimator');
 const version = 1;
 const baseURL = `/api/v${version}/on-covid-19`;
-const auditLogPath = './audit-log.txt';
-const errorLogPath = './error-log.txt';
+const auditLogPath = './audits.log.json';
 
 /**
  * Log audit messages.
+ *
+ * @param {object} fs File system object.
  *
  * @param {string} path Log path.
  */
@@ -21,31 +22,23 @@ const auditLogger = (fs, path) => (req, res, time) => {
     try {
       const { originalUrl } = req;
       const timestamp = new Date().getTime();
-      const t = time.toFixed(2);
-      const message = `${timestamp}\t\t${originalUrl}\t\tdone in ${t} ms\n`;
+      const duration = time.toFixed(2);
 
-      await fs.createWriteStream(path, { flags: 'a' }).write(message);
+      const logs = await fs.readJson(path);
+
+      logs[timestamp] = { originalUrl, duration };
+
+      await fs.writeJson(path, logs);
     } catch (e) {
       throw e;
     }
   });
 };
 
-/**
- * Log error messages.
- *
- * @param {object} fs File system object.
- *
- * @param {string} path Log path.
- */
-const errorLogger = (fs, path) => async (err, req, res, next) => {
-  try {
-    await fs.createWriteStream(path, { flags: 'a' }).write(err.stack);
-
-    next(err);
-  } catch (e) {
-    next(e);
-  }
+// Log errors to console
+const errorLogger = (err, req, res, next) => {
+  console.log(err.stack);
+  next(err);
 };
 
 // Respond with a JSON object.
@@ -68,10 +61,24 @@ const xmlResponse = (req, res) => {
   res.status(200).set('Content-Type', 'text/xml').send(data);
 };
 
-// Respond with logs.
-const logsResponse = (fs) => async (req, res, next) => {
+/**
+ * Respond with logs.
+ *
+ * @param {object} fs File system object.
+ *
+ * @param {string} path Log path.
+ */
+const logsResponse = (fs, path) => async (req, res, next) => {
   try {
-    await fs.createReadStream(auditLogPath).pipe(res);
+    let data = '';
+
+    const audits = await fs.readJson(path);
+
+    Object.keys(audits).forEach((v) => {
+      data += `${v}\t\t${audits[v].originalUrl}\t\t done in ${audits[v].duration} seconds\n`;
+    });
+
+    res.status(200).set('Content-Type', 'text/plain').send(data);
   } catch (e) {
     next(e);
   }
@@ -97,9 +104,9 @@ app.post(`${baseURL}/json`, jsonResponse);
 
 app.post(`${baseURL}/xml`, xmlResponse);
 
-app.all(`${baseURL}/logs`, logsResponse(fs));
+app.all(`${baseURL}/logs`, logsResponse(fs, auditLogPath));
 
-app.use(errorLogger(fs, errorLogPath));
+app.use(errorLogger);
 
 app.use(errorHandler);
 
