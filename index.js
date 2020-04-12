@@ -20,13 +20,14 @@ const auditLogPath = './audits.log.json';
 const auditLogger = (fs, path) => (req, res, time) => {
   res.on('finish', async () => {
     try {
-      const { originalUrl } = req;
+      const { method, originalUrl } = req;
+      const { statusCode } = res;
       const timestamp = new Date().getTime();
-      const duration = time.toFixed(2);
+      const duration = `${time.toFixed(2)}ms`;
 
       const logs = await fs.readJson(path);
 
-      logs[timestamp] = { originalUrl, duration };
+      logs[timestamp] = { method, originalUrl, statusCode, duration };
 
       await fs.writeJson(path, logs);
     } catch (e) {
@@ -77,7 +78,9 @@ const logsResponse = (fs, path) => async (req, res, next) => {
     const audits = await fs.readJson(path);
 
     Object.keys(audits).forEach((v) => {
-      data += `${v}\t\t${audits[v].originalUrl}\t\tdone in ${audits[v].duration} seconds\n`;
+      const audit = audits[v];
+
+      data += `${audit.method}\t\t${audit.originalUrl}\t\t${audit.statusCode}\t\t${audit.duration}\n`;
     });
 
     res.status(200).setHeader('Content-Type', 'text/plain');
