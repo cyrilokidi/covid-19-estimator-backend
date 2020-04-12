@@ -72,7 +72,7 @@ const xmlResponse = (req, res) => {
  */
 const logsResponse = (fs, path) => async (req, res, next) => {
   try {
-    let data = null;
+    let data = '';
 
     const audits = await fs.readJson(path);
 
