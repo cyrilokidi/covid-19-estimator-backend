@@ -58,7 +58,7 @@ const xmlResponse = (req, res) => {
 
   const data = `<estimate>${jsonxml(estimation)}</estimate>`;
 
-  res.status(200).set('Content-Type', 'text/xml').send(data);
+  res.status(200).set('Content-Type', 'application/xml').send(data);
 };
 
 /**
@@ -78,7 +78,7 @@ const logsResponse = (fs, path) => async (req, res, next) => {
       data += `${v}\t\t${audits[v].originalUrl}\t\tdone in ${audits[v].duration} seconds\n`;
     });
 
-    res.status(200).set('Content-Type', 'text/plain').send(data);
+    res.status(200).set('Content-Type', 'text/html').send(data);
   } catch (e) {
     next(e);
   }
@@ -86,7 +86,7 @@ const logsResponse = (fs, path) => async (req, res, next) => {
 
 // Handle route errors.
 const errorHandler = async (err, req, res, next) => {
-  res.status(500).set('Content-Type', 'text/plain').send('Internal server error.');
+  res.status(500).set('Content-Type', 'text/html').send('Internal server error.');
 };
 
 const app = express();
@@ -96,7 +96,7 @@ app.use(express.json());
 
 app.use(responseTime(auditLogger(fs, auditLogPath)));
 
-app.all('/', (req, res) => res.status(200).set('Content-Type', 'text/plain').send('API is ready.'));
+app.all('/', (req, res) => res.status(200).set('Content-Type', 'text/html').send('API is ready.'));
 
 app.post(baseURL, jsonResponse);
 
