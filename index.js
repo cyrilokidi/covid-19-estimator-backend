@@ -72,12 +72,12 @@ const xmlResponse = (req, res) => {
  */
 const logsResponse = (fs, path) => async (req, res, next) => {
   try {
-    let data = '\n';
+    let data = null;
 
     const audits = await fs.readJson(path);
 
     Object.keys(audits).forEach((v) => {
-      data += `${v}\t\t${audits[v].originalUrl}\t\tdone in ${audits[v].duration} seconds`;
+      data += `${v}\t\t${audits[v].originalUrl}\t\tdone in ${audits[v].duration} seconds\n`;
     });
 
     res.status(200).setHeader('Content-Type', 'text/plain');
