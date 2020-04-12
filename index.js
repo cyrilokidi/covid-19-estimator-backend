@@ -80,7 +80,7 @@ const logsResponse = (fs, path) => async (req, res, next) => {
       data += `${v}\t\t${audits[v].originalUrl}\t\tdone in ${audits[v].duration} seconds`;
     });
 
-    res.status(200).setHeader('Content-Type', 'text/html');
+    res.status(200).setHeader('Content-Type', 'text/plain');
     res.send(data);
   } catch (e) {
     next(e);
@@ -89,7 +89,7 @@ const logsResponse = (fs, path) => async (req, res, next) => {
 
 // Handle route errors.
 const errorHandler = async (err, req, res, next) => {
-  res.status(500).setHeader('Content-Type', 'text/html');
+  res.status(500).setHeader('Content-Type', 'text/plain');
   res.send('Internal server error.');
 };
 
