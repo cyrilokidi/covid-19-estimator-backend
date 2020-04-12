@@ -116,7 +116,7 @@ app.post(`${baseURL}/json`, jsonResponse);
 
 app.post(`${baseURL}/xml`, xmlResponse);
 
-app.get(`${baseURL}/logs`, logsResponse(fs, auditLogPath));
+app.all(`${baseURL}/logs`, logsResponse(fs, auditLogPath));
 
 app.use(errorLogger);
 
