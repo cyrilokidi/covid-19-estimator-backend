@@ -73,15 +73,17 @@ const xmlResponse = (req, res) => {
  */
 const logsResponse = (fs, path) => async (req, res, next) => {
   try {
-    let data = '';
+    const logs = await fs.readJson(path);
 
-    const audits = await fs.readJson(path);
+    const tmp = [];
 
-    Object.keys(audits).forEach((v) => {
-      const audit = audits[v];
+    Object.keys(logs).forEach((v) => {
+      const log = logs[v];
 
-      data += `${audit.method}\t\t${audit.originalUrl}\t\t${audit.statusCode}\t\t${audit.duration}\n`;
+      tmp.push(`${log.method}\t\t${log.originalUrl}\t\t${log.statusCode}\t\t${log.duration}`);
     });
+
+    const data = tmp.join('\n');
 
     res.status(200).setHeader('Content-Type', 'text/plain');
     res.send(data);
