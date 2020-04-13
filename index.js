@@ -23,7 +23,7 @@ const auditLogger = (fs, path) => (req, res, time) => {
       const { method, originalUrl } = req;
       const { statusCode } = res;
       const timestamp = new Date().getTime();
-      const duration = `${time.toFixed(2)}ms`;
+      const duration = time < 10 ? `0${Math.trunc(time)}` : `${Math.trunc(time)}`;
 
       const logs = await fs.readJson(path);
 
@@ -82,7 +82,7 @@ const logsResponse = (fs, path) => async (req, res, next) => {
     Object.keys(logs).forEach((v) => {
       const log = logs[v];
 
-      res.write(`${log.method}\t\t${log.originalUrl}\t\t${log.statusCode}\t\t${log.duration}\n`);
+      res.write(`${log.method}\t\t${log.originalUrl}\t\t${log.statusCode}\t\t${log.duration}ms\n`);
     });
 
     res.status(200);
