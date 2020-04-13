@@ -75,18 +75,16 @@ const logsResponse = (fs, path) => async (req, res, next) => {
   try {
     const logs = await fs.readJson(path);
 
-    const tmp = [];
+    res.setHeader('Content-type', 'text/plain');
 
     Object.keys(logs).forEach((v) => {
       const log = logs[v];
 
-      tmp.push(`${log.method}\t\t${log.originalUrl}\t\t${log.statusCode}\t\t${log.duration}`);
+      res.write(`${log.method}\t\t${log.originalUrl}\t\t${log.statusCode}\t\t${log.duration}\n`);
     });
 
-    const data = tmp.join('\n');
-
-    res.status(200).setHeader('Content-Type', 'text/plain');
-    res.send(data);
+    res.status(200);
+    res.end();
   } catch (e) {
     next(e);
   }
