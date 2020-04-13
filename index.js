@@ -48,7 +48,8 @@ const jsonResponse = (req, res) => {
 
   const data = estimator(body);
 
-  res.status(200).setHeader('Content-Type', 'application/json');
+  res.status(200);
+  res.setHeader('Content-Type', 'application/json');
   res.json(data);
 };
 
@@ -60,7 +61,8 @@ const xmlResponse = (req, res) => {
 
   const data = `<estimate>${jsonxml(estimation)}</estimate>`;
 
-  res.status(200).setHeader('Content-Type', 'application/xml');
+  res.status(200);
+  res.setHeader('Content-Type', 'application/xml');
   res.send(data);
 };
 
@@ -92,7 +94,8 @@ const logsResponse = (fs, path) => async (req, res, next) => {
 
 // Handle route errors.
 const errorHandler = async (err, req, res, next) => {
-  res.status(500).setHeader('Content-Type', 'text/plain');
+  res.status(500);
+  res.setHeader('Content-Type', 'text/plain');
   res.send('Internal server error.');
 };
 
@@ -104,7 +107,8 @@ app.use(express.json());
 app.use(responseTime(auditLogger(fs, auditLogPath)));
 
 app.all('/', (req, res) => {
-  res.status(200).setHeader('Content-Type', 'text/html');
+  res.status(200);
+  res.setHeader('Content-Type', 'text/plain');
   res.send('API is ready.');
 });
 
