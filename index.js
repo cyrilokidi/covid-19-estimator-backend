@@ -4,7 +4,7 @@ const express = require('express');
 const jsonxml = require('jsontoxml');
 const responseTime = require('response-time');
 const fs = require('fs-extra');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 const estimator = require('./estimator');
 const version = 1;
 const baseURL = `/api/v${version}/on-covid-19`;
@@ -23,7 +23,7 @@ const auditLogger = (fs, path) => (req, res, time) => {
       const { method, originalUrl } = req;
       const { statusCode } = res;
       const timestamp = new Date().getTime();
-      const duration = time < 10 ? `0${Math.trunc(time)}` : `${Math.trunc(time)}`;
+      const duration = `${Math.trunc(time)}`.padStart(2, 0);
 
       const logs = await fs.readJson(path);
 
